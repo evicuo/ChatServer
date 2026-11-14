@@ -3,14 +3,13 @@ package client;
 import protocol.Packet;
 import protocol.PacketIO;
 import protocol.Protocol;
-import server.ClientConnection;
 
-import javax.xml.crypto.Data;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 public class ChatClient implements Runnable {
@@ -19,12 +18,12 @@ public class ChatClient implements Runnable {
     private final DataOutputStream outStream;
 
     public ChatClient() throws IOException {
-            socket = new Socket("localhost", 52123);
-            inpStream = new DataInputStream(socket.getInputStream());
-            outStream = new DataOutputStream(socket.getOutputStream());
+        socket = new Socket("localhost", 52123);
+        inpStream = new DataInputStream(socket.getInputStream());
+        outStream = new DataOutputStream(socket.getOutputStream());
     }
 
-    public static void main(String[] args ) throws IOException {
+    static void main(String[] args) throws IOException {
         ChatClient client1 = new ChatClient();
         new Thread(client1).start();
         client1.readUserInputs();
@@ -35,22 +34,21 @@ public class ChatClient implements Runnable {
         listenAndPrintIncomingPackets();
     }
 
-    public void listenAndPrintIncomingPackets(){
-        try{
-            while(true){
-                System.out.println((PacketIO.read(inpStream).getText()));
+    public void listenAndPrintIncomingPackets() {
+        try {
+            while (true) {
+                System.out.println((PacketIO.read(inpStream).orElseThrow().text()));
             }
-        } catch(EOFException e){
-            e.printStackTrace();
-        }  catch (IOException e) {
-            e.printStackTrace();
+        } catch (SocketException e){
+            System.out.println("Client quit.");
+        } catch (IOException e){
+            System.out.println("IO Exception occured whilst listen to packets ");
         }
-
     }
 
     public void readUserInputs() throws IOException {
         Scanner keyboard = new Scanner(System.in);
-        while(keyboard.hasNextLine()){
+        while (keyboard.hasNextLine()) {
             String message = keyboard.nextLine();
             Packet packet = new Packet(Protocol.CHAT, message);
             PacketIO.write(outStream, packet);

@@ -11,7 +11,7 @@ public class UnexpectedProtocolTypeException extends Exception {
      * @param receivedType - The type that was retrieved from packet
      *
      */
-    public UnexpectedProtocolTypeException(int expectedType, int receivedType){
+    public UnexpectedProtocolTypeException(int expectedType, int receivedType) {
         this.expectedType = expectedType;
         this.receivedType = receivedType;
     }

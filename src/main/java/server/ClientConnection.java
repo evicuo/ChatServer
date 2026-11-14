@@ -4,16 +4,19 @@ import protocol.Packet;
 import protocol.PacketIO;
 import protocol.Protocol;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 
 public class ClientConnection implements Runnable {
 
     private final Socket socket;
-    private ChatRoom chatRoom;
+    private final ChatRoom chatRoom;
 
-    private DataInputStream inpStream;
-    private DataOutputStream outStream;
+    private final DataInputStream inpStream;
+    private final DataOutputStream outStream;
 
     public ClientConnection(Socket socket, ChatRoom chatRoom) throws IOException {
         this.socket = socket;
@@ -33,15 +36,15 @@ public class ClientConnection implements Runnable {
     public void run() {
         chatRoom.addClient(this);
         try {
-            while(true){
-                Packet packet = PacketIO.read(inpStream);
-                System.out.println(packet.getText());
+            while (true) {
+                Packet packet = PacketIO.read(inpStream).orElseThrow();
+                System.out.println(packet.text());
                 handle(packet);
             }
         } catch (EOFException e) {
             System.out.println("Client left");
-        } catch (IOException e){
-
+        } catch (IOException e) {
+            System.out.println("Internal error occured");
         } finally {
             exit();
         }
@@ -49,16 +52,18 @@ public class ClientConnection implements Runnable {
 
     /**
      * Executes methods based on type of packet the client received
+     *
      * @param packet The packet object created from byte packet
      */
-    private void handle(Packet packet){
-        if(packet.getType() == Protocol.CHAT){
-            chatRoom.broadcast(this, packet.getText());
+    private synchronized void handle(Packet packet) {
+        if (packet.type() == Protocol.CHAT) {
+            chatRoom.broadcast(this, packet.text());
         }
     }
 
     /**
      * Sends a packet object to this client
+     *
      * @param packet
      * @throws IOException
      */
@@ -71,8 +76,8 @@ public class ClientConnection implements Runnable {
      * Closes client socket and removes client from chatroom
      * To be executed upon client disconnect/crash
      */
-    public void exit(){
-        try{
+    public void exit() {
+        try {
             socket.close();
             chatRoom.removeClient(this);
             System.out.println("Client connection closed");
@@ -80,7 +85,6 @@ public class ClientConnection implements Runnable {
             e.printStackTrace();
         }
     }
-
 
 
 }

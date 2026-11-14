@@ -6,11 +6,11 @@ import java.net.Socket;
 
 class ChatServer {
     private final int PORT = 52123;
-    private boolean acceptingConnections = true;
+    private final boolean acceptingConnections = true;
     private ChatRoom chatRoom;
 
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         ChatServer server = new ChatServer();
         server.start();
     }
@@ -21,16 +21,18 @@ class ChatServer {
      */
     public void start() {
 
-        try(ServerSocket serSocket = new ServerSocket(PORT)) {
+        try (ServerSocket serSocket = new ServerSocket(PORT)) {
             System.out.println("Server started successfully!");
             chatRoom = new ChatRoom();
 
             while (acceptingConnections) {
                 Socket clientSocket = serSocket.accept();
-                acceptClient(clientSocket);
+                try {
+                    acceptClient(clientSocket);
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
             }
-
-            stop(serSocket);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -39,6 +41,7 @@ class ChatServer {
 
     /**
      * Takes an accepted socket, creates a new ClientConnection, and starts a new thread to handle
+     *
      * @param clientSocket
      * @throws IOException
      */
@@ -49,7 +52,7 @@ class ChatServer {
         clientThread.start();
     }
 
-    public void stop(ServerSocket serSocket){
+    public void stop(ServerSocket serSocket) {
         try {
             serSocket.close();
             System.out.println("Server socket closed");

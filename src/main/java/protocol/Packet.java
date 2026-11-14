@@ -1,9 +1,6 @@
 package protocol;
 
-public class Packet {
-
-    private final int type;
-    private final String text;
+public record Packet(int type, String text) {
 
     /**
      * Class which defines the attributes of a packet
@@ -12,16 +9,15 @@ public class Packet {
      * @param text String which a packet holds.
      */
 
-    public Packet(int type, String text){
-        this.type = type;
-        this.text = text;
+    public Packet {
     }
 
     /**
      * @return String which holds the value held in a packet.
      */
 
-    public String getText() {
+    @Override
+    public String text() {
         return text;
     }
 
@@ -29,7 +25,8 @@ public class Packet {
      * @return The int type defined in a packet.
      */
 
-    public int getType() {
+    @Override
+    public int type() {
         return type;
     }
 }
