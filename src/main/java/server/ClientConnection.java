@@ -55,7 +55,7 @@ public class ClientConnection implements Runnable {
      *
      * @param packet The packet object created from byte packet
      */
-    private synchronized void handle(Packet packet) {
+    private void handle(Packet packet) {
         if (packet.type() == Protocol.CHAT) {
             chatRoom.broadcast(this, packet.text());
         }
@@ -67,7 +67,7 @@ public class ClientConnection implements Runnable {
      * @param packet
      * @throws IOException
      */
-    public void send(Packet packet) throws IOException {
+    public synchronized void send(Packet packet) throws IOException {
         PacketIO.write(outStream, packet);
     }
 

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public class PacketIO {
 
+
     /**
      * Takes a packet and writes to output stream in byte-form
      * @param out Output stream to be written to
@@ -16,13 +17,17 @@ public class PacketIO {
      */
     public static void write(DataOutputStream out, Packet packet) throws IOException {
         byte[] payload = packet.text().getBytes(StandardCharsets.UTF_8);
-
         int length = 1 + payload.length;
+
+
         out.writeInt(length);
-        out.writeByte(packet.type());
+        out.writeInt(packet.type());
         out.write(payload);
         out.flush();
     }
+
+
+
 
     /**
      * Takes a stream of bytes and returns a packet
